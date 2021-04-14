@@ -11,7 +11,7 @@ io.use((socket, next) => {
     return next(new Error("invalid username"));
   }
   socket.username = username;
-  console.log(username)
+  console.log(`${username} logou!`)
   next();
 });
 
@@ -37,11 +37,11 @@ io.on("connection", (socket) => {
       users[socket.username] = id
     }
     socket.emit("user online", users[username] || null)
-  }) 
-
+  })
+             
   // forward the private message to the right recipient
   socket.on("private message", ({ content, to }) => {
-    console.log(content)
+    console.log(`Messagem: ${content} para ${to}`)
     socket.to(to).emit("private message", {
       content,
       from: socket.id,
@@ -50,8 +50,13 @@ io.on("connection", (socket) => {
 
   // notify users upon disconnection
   socket.on("disconnect", () => {
-    socket.broadcast.emit("user disconnected", socket.id);
+    console.log(`${socket.username} deslogou!`)
+    socket.to(null).emit('dest disconnected', socket.username)
   });
+
+  socket.on("dest disconnected", (destUser) => {
+		console.log(`${socket.username} recebeu a remoção de ${destUser}`)
+  })
 });
 
 const PORT = process.env.PORT || 3003;

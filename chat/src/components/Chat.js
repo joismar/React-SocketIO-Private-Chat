@@ -5,6 +5,11 @@ import MessagePanel from "./MessagePanel"
 
 function Chat(props) {
 	const [
+		userMessages,
+		setUserMessages,
+	] = useState([])
+
+	const [
 		selectedUser,
 		setSelectedUser
 	] = useState({
@@ -13,13 +18,20 @@ function Chat(props) {
 	})
 
 	useEffect(() => {
+		socket.on("private message", ({ content, from }) => {
+			onReceiveMessage(content, from)
+    })
+	}, [userMessages])
+
+	useEffect(() => {
 		socket.on("connect", () => {
+			console.log(props.username)
 			socket.emit('user is online', props.destUsername)
     })
 
 		socket.on("user online", (userId) => {
 			setSelectedUser({
-				userId: userId,
+				userId: userId || 'OFFLINE',
 				username: props.destUsername,
 			})
 		})
@@ -27,6 +39,8 @@ function Chat(props) {
 		return function cleanup() {
       socket.off("connect")
 			socket.off("user online")
+			socket.off("private message")
+			socket.off("disconnect")
     }
 	}, [props.destUsername])
 
@@ -40,19 +54,29 @@ function Chat(props) {
     }
 	}, [props.destUsername])
 
-	function onMessage(content) {
+	function onMessage(content, to) {
 		socket.emit("private message", {
 			content,
-			to: selectedUser.userID,
+			to,
 		})
-		selectedUser.messages.push({
-			content,
-			fromSelf: true,
-		})
-		setSelectedUser({
-			userId: selectedUser.userId,
-			username: props.destUsername,
-		})
+		setUserMessages([
+			...userMessages,
+			{
+				content,
+				fromSelf: true,
+			}
+		])
+	}
+
+	function onReceiveMessage(content, from) {
+		console.log(`Messagem: ${content} de ${from}`)
+		setUserMessages([
+			...userMessages,
+			{
+				content,
+				fromSelf: false,
+			}
+		])
 	}
 
 	return (
@@ -64,6 +88,7 @@ function Chat(props) {
 			<MessagePanel
 				username={props.username}
 				selectedUser={selectedUser}
+				userMessages={userMessages}
 				onMessage={onMessage}
 			></MessagePanel>
 		</div>

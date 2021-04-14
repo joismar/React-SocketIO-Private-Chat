@@ -17,7 +17,7 @@ function App() {
   ] = useState('Jennynha')
 
   function onUsernameSelection(username) {
-    setUsernameSelected(true)
+    setUsernameSelected(username)
     socket.auth = { username }
     socket.connect()
   }
