@@ -18,7 +18,7 @@ function Chat(props) {
 	})
 
 	useEffect(() => {
-		socket.on("private message", ({ content, from }) => {
+		socket.on("private message", ({ content, from, to }) => {
 			onReceiveMessage(content, from)
     })
 	}, [userMessages])
@@ -55,6 +55,7 @@ function Chat(props) {
 	}, [props.destUsername])
 
 	function onMessage(content, to) {
+		console.log(`Mensagem enviada para ${to}`)
 		socket.emit("private message", {
 			content,
 			to,
@@ -69,7 +70,7 @@ function Chat(props) {
 	}
 
 	function onReceiveMessage(content, from) {
-		console.log(`Messagem: ${content} de ${from}`)
+		console.log(`Mensagem ${content} recebida de ${from}`)
 		setUserMessages([
 			...userMessages,
 			{

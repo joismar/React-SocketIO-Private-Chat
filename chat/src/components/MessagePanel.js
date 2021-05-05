@@ -5,6 +5,7 @@ function MessagePanel(props) {
 	const [inputText, setInputText] = useState('')
 
 	function handleSubmit(event) {
+		console.log(props.selectedUser.userId)
 		props.onMessage(inputText, props.selectedUser.userId)
 		setInputText('')
 		event.preventDefault()

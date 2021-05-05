@@ -7,25 +7,53 @@ import './App.css'
 
 function App() {
   const [
-    usernameSelected, 
-    setUsernameSelected 
-  ] = useState(false)
+    username, 
+    setUsername 
+  ] = useState(getUsername())
 
   const [
     destUsername,
     setDestUsername
-  ] = useState('Jennynha')
+  ] = useState(getDestUsername())
 
   function onUsernameSelection(username) {
-    setUsernameSelected(username)
+    setUsername(username)
     socket.auth = { username }
     socket.connect()
   }
 
+  function getUsername() {
+    return localStorage.getItem("username") || 'Chupeta'
+  }
+
+  function getDestUsername() {
+    return sessionStorage.getItem("destUsername") || 'Jenny'
+  }
+
   useEffect(() => {
+    const sessionID = localStorage.getItem("sessionID");
+
+    if (sessionID) {
+      setUsername(username);
+      socket.auth = { sessionID };
+      socket.connect();
+    } else {
+      socket.auth = { username }
+      socket.connect()
+    }
+
+    socket.on("session", ({ sessionID, userID }) => {
+      // attach the session ID to the next reconnection attempts
+      socket.auth = { sessionID };
+      // store it in the localStorage
+      localStorage.setItem("sessionID", sessionID);
+      // save the ID of the user
+      socket.userID = userID;
+    });
+
     socket.on("connect_error", (err) => {
       if (err.message === "invalid username") {
-        setUsernameSelected(false)
+        setUsername(false)
       }
     })
 
@@ -37,14 +65,14 @@ function App() {
   return (
     <div className="App">
       {
-        !usernameSelected ?
+        !username ?
         <SelectUsername 
           onUsernameSelection={onUsernameSelection}
           setDestUsername={setDestUsername}
           destUsername={destUsername}
         ></SelectUsername> :
         <Chat 
-          username={usernameSelected}
+          username={username}
           destUsername={destUsername}
         ></Chat>
       }
