@@ -10,11 +10,11 @@ function Chat(props) {
 	] = useState([])
 
 	const [
-		selectedUser,
-		setSelectedUser
+		destUserData,
+		setDestUserData
 	] = useState({
-		userId: 'OFFLINE',
-		username: null,
+		userId: null,
+		connected: false,
 	})
 
 	useEffect(() => {
@@ -29,11 +29,8 @@ function Chat(props) {
 			socket.emit('user is online', props.destUsername)
     })
 
-		socket.on("user online", (userId) => {
-			setSelectedUser({
-				userId: userId || 'OFFLINE',
-				username: props.destUsername,
-			})
+		socket.on("user online", (userData) => {
+			setDestUserData(userData)
 		})
 
 		return function cleanup() {
@@ -83,12 +80,13 @@ function Chat(props) {
 	return (
 		<div>
 			<p>
-				UserId: {selectedUser.userId || 'OFFLINE'}    
-				Username: {selectedUser.username}
+				UserId: {destUserData.userId}    
+				Username: {props.destUsername} {destUserData.connected ? '(ONLINE)' : '(OFFLINE)'}
 			</p>
 			<MessagePanel
 				username={props.username}
-				selectedUser={selectedUser}
+				destUsername={props.destUsername}
+				destUserData={destUserData}
 				userMessages={userMessages}
 				onMessage={onMessage}
 			></MessagePanel>

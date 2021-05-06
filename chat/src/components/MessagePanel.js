@@ -5,8 +5,7 @@ function MessagePanel(props) {
 	const [inputText, setInputText] = useState('')
 
 	function handleSubmit(event) {
-		console.log(props.selectedUser.userId)
-		props.onMessage(inputText, props.selectedUser.userId)
+		props.onMessage(inputText, props.destUserData.userId)
 		setInputText('')
 		event.preventDefault()
 	}
@@ -34,7 +33,7 @@ function MessagePanel(props) {
 									displaySender(index) ?
 										(
 											<div class="sender">
-												<b>{ message.fromSelf ? '(Tu)' : props.selectedUser.username }</b>
+												<b>{ message.fromSelf ? '(Tu)' : props.destUsername }</b>
 											</div>
 										) : ''
 									}

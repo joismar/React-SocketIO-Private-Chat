@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
       }
     })
 
-    socket.emit("user online", users[username] ? users[username].userID : null)
+    socket.emit("user online", users[username] || null)
   })
              
   // forward the private message to the right recipient

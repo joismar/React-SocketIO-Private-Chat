@@ -9,32 +9,38 @@ function App() {
   const [
     username, 
     setUsername 
-  ] = useState(getUsername())
+  ] = useState(null)
 
   const [
     destUsername,
     setDestUsername
-  ] = useState(getDestUsername())
+  ] = useState(null)
 
-  function onUsernameSelection(username) {
-    setUsername(username)
-    socket.auth = { username }
-    socket.connect()
-  }
+  // function onUsernameSelection(username) {
+  //   setUsername(username)
+  //   socket.auth = { username }
+  //   socket.connect()
+  // }
 
   function getUsername() {
-    return localStorage.getItem("username") || 'Chupeta'
+    return sessionStorage.getItem("username")
   }
 
   function getDestUsername() {
-    return sessionStorage.getItem("destUsername") || 'Jenny'
+    return sessionStorage.getItem("destUsername")
   }
+
+  useEffect(() => {
+    setUsername(getUsername())
+    setDestUsername(getDestUsername())
+
+    console.log(username, destUsername)
+  }, [username, destUsername])
 
   useEffect(() => {
     const sessionID = localStorage.getItem("sessionID");
 
     if (sessionID) {
-      setUsername(username);
       socket.auth = { sessionID };
       socket.connect();
     } else {
@@ -53,24 +59,26 @@ function App() {
 
     socket.on("connect_error", (err) => {
       if (err.message === "invalid username") {
-        setUsername(false)
+        setUsername(null)
+        setDestUsername(null)
       }
     })
 
     return function cleanup() {
       socket.off("connect_error")
     }
-  }, [])
+  }, [username])
 
   return (
     <div className="App">
       {
-        !username ?
-        <SelectUsername 
-          onUsernameSelection={onUsernameSelection}
-          setDestUsername={setDestUsername}
-          destUsername={destUsername}
-        ></SelectUsername> :
+        (!username && !destUsername) ?
+        // <SelectUsername 
+        //   onUsernameSelection={onUsernameSelection}
+        //   setDestUsername={setDestUsername}
+        //   destUsername={destUsername}
+        // ></SelectUsername> 
+        <p>Loading...</p>:
         <Chat 
           username={username}
           destUsername={destUsername}
