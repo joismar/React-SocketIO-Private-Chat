@@ -30,7 +30,11 @@ function Chat(props) {
     })
 
 		socket.on("user online", (userData) => {
-			setDestUserData(userData)
+			if(userData) {
+				if(userData.connected) {
+					setDestUserData(userData)
+				}
+			}
 		})
 
 		return function cleanup() {
