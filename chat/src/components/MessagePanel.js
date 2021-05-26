@@ -26,7 +26,7 @@ function MessagePanel(props) {
          <ul class="messages">
             {props.userMessages.map((message, index) => {
                return (
-                  <li class="message">
+                  <li key={index} class="message">
                      {displaySender(index) ? (
                         <div class="sender">
                            <b>

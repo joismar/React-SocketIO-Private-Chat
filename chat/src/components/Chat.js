@@ -18,10 +18,18 @@ function Chat(props) {
          }
       });
 
+      // console.log(userMessages)
+
       return () => {
          setOnReceived(true);
       };
    }, [userMessages]);
+
+   // useEffect(() => {
+   //    socket.on('private message', ({ content, from, to }) => {
+   //       onReceiveMessage(content, from);
+   //    });
+   // }, []);
 
    useEffect(() => {
       socket.on('connect', () => {
@@ -29,19 +37,21 @@ function Chat(props) {
          socket.emit('user is online', props.destUsername);
       });
 
-      socket.on('user online', (userData) => {
-         setDestUserData(userData);
-      });
+      socket.on("user online", (userData) => {
+			if(userData) {
+				if(userData.connected) {
+					setDestUserData(userData)
+				}
+			}
+		})
 
-      //return cleanup();
+      return function cleanup() {
+         socket.off('connect');
+         socket.off('user online');
+         socket.off('private message');
+         socket.off('disconnect');
+      }
    }, [props.destUsername]);
-
-   function cleanup() {
-      socket.off('connect');
-      socket.off('user online');
-      socket.off('private message');
-      socket.off('disconnect');
-   }
 
    useEffect(() => {
       const timer = setInterval(() => {
@@ -54,7 +64,7 @@ function Chat(props) {
    }, [props.destUsername]);
 
    function onMessage(content, to) {
-      console.log(`Mensagem enviada para ${to}`);
+      console.log(`Mensagem ${content} enviada para ${to}`);
       socket.emit('private message', {
          content,
          to,
@@ -70,6 +80,7 @@ function Chat(props) {
 
    function onReceiveMessage(content, from) {
       console.log(`Mensagem ${content} recebida de ${from}`);
+      console.log('Mensagens antes: ', userMessages)
       setUserMessages([
          ...userMessages,
          {
@@ -77,6 +88,7 @@ function Chat(props) {
             fromSelf: false,
          },
       ]);
+      console.log('Mensagens depois: ', userMessages)
    }
 
    return (
