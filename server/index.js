@@ -79,7 +79,7 @@ io.on("connection", (socket) => {
   socket.on("private message", ({ content, to }) => {
     console.log(`Messagem: ${content} para ${to}`)
 
-    socket.to(to).to(socket.userID).emit("private message", {
+    socket.to(to).emit("private message", {
       content,
       from: socket.userID,
       to,

@@ -10,26 +10,36 @@ function Chat(props) {
 
    const [onReceived, setOnReceived] = useState(true);
 
-   useEffect(() => {
-      socket.on('private message', ({ content, from, to }) => {
-         if (onReceived) {
-            setOnReceived(false);
-            onReceiveMessage(content, from);
-         }
-      });
-
-      // console.log(userMessages)
-
-      return () => {
-         setOnReceived(true);
-      };
-   }, [userMessages]);
-
    // useEffect(() => {
    //    socket.on('private message', ({ content, from, to }) => {
-   //       onReceiveMessage(content, from);
+   //       if (onReceived) {
+   //          setOnReceived(false);
+   //          onReceiveMessage(content, from);
+   //       }
    //    });
-   // }, []);
+
+   //    // console.log(userMessages)
+
+   //    return () => {
+   //       setOnReceived(true);
+   //    };
+   // }, [userMessages]);
+
+   useEffect(() => {
+      socket.on('private message', ({ content, from, to }) => {
+         if (from != socket.userID) {
+            setUserMessages(userMessages => [
+               ...userMessages,
+               {
+                  content,
+                  fromSelf: true,
+               },
+            ]);
+            // console.log('PASSOU AQUI')
+            // onReceiveMessage(content, from);
+         };
+      });
+   }, []);
 
    useEffect(() => {
       socket.on('connect', () => {
@@ -49,7 +59,6 @@ function Chat(props) {
          socket.off('connect');
          socket.off('user online');
          socket.off('private message');
-         socket.off('disconnect');
       }
    }, [props.destUsername]);
 

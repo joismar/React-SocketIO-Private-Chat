@@ -39,13 +39,16 @@ function App() {
 
   useEffect(() => {
     const sessionID = localStorage.getItem("sessionID");
+    const username = getUsername()
 
     if (sessionID) {
       socket.auth = { sessionID };
       socket.connect();
     } else {
-      socket.auth = { username }
-      socket.connect()
+      if (username) {
+        socket.auth = { username }
+        socket.connect()
+      }
     }
 
     socket.on("session", ({ sessionID, userID }) => {
@@ -65,9 +68,10 @@ function App() {
     })
 
     return function cleanup() {
+      socket.off("session")
       socket.off("connect_error")
     }
-  }, [username])
+  }, [])
 
   return (
     <div className="App">
