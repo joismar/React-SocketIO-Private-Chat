@@ -13,6 +13,7 @@ const sessionStore = new InMemorySessionStore();
 
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
+
   if (sessionID) {
     // find existing session
     const session = sessionStore.findSession(sessionID);
@@ -23,10 +24,12 @@ io.use((socket, next) => {
       return next();
     }
   }
+
   const username = socket.handshake.auth.username;
   if (!username) {
     return next(new Error("invalid username"));
   }
+  
   // create new session
   socket.sessionID = randomId();
   socket.userID = randomId();
@@ -35,6 +38,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
+  console.log("Connected!")
   // persist session
   sessionStore.saveSession(socket.sessionID, {
     userID: socket.userID,

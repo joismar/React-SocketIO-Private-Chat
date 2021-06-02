@@ -27,12 +27,13 @@ function Chat(props) {
 
    useEffect(() => {
       socket.on('private message', ({ content, from, to }) => {
+         console.log(userMessages)
          if (from != socket.userID) {
             setUserMessages(userMessages => [
                ...userMessages,
                {
                   content,
-                  fromSelf: true,
+                  fromSelf: false,
                },
             ]);
             // console.log('PASSOU AQUI')
@@ -49,9 +50,7 @@ function Chat(props) {
 
       socket.on("user online", (userData) => {
 			if(userData) {
-				if(userData.connected) {
-					setDestUserData(userData)
-				}
+				setDestUserData(userData)
 			}
 		})
 

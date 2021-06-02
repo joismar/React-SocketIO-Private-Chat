@@ -44,11 +44,9 @@ function App() {
     if (sessionID) {
       socket.auth = { sessionID };
       socket.connect();
-    } else {
-      if (username) {
-        socket.auth = { username }
-        socket.connect()
-      }
+    } else if (username) {
+      socket.auth = { username }
+      socket.connect()
     }
 
     socket.on("session", ({ sessionID, userID }) => {
