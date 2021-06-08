@@ -4,7 +4,38 @@ import MessagePanel from './MessagePanel';
 // import User from "./User"
 
 function Chat(props) {
-   const [userMessages, setUserMessages] = useState([]);
+	const [
+		userMessages,
+		setUserMessages,
+	] = useState([])
+
+	const [
+		destUserData,
+		setDestUserData
+	] = useState({
+		userId: null,
+		connected: false,
+	})
+
+	useEffect(() => {
+		socket.on("private message", ({ content, from, to }) => {
+			onReceiveMessage(content, from)
+    })
+	}, [userMessages])
+
+	useEffect(() => {
+		socket.on("connect", () => {
+			console.log(props.username)
+			socket.emit('user is online', props.destUsername)
+    })
+
+		socket.on("user online", (userData) => {
+			if(userData) {
+				if(userData.connected) {
+					setDestUserData(userData)
+				}
+			}
+		})
 
    const [destUserData, setDestUserData] = useState({});
 
