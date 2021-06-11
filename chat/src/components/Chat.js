@@ -1,150 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../socket';
+import ChatBox from './ChatBox';
+import { getUsername, getDestUsername } from '.././helpers'
 import MessagePanel from './MessagePanel';
 // import User from "./User"
 
 function Chat(props) {
-	const [
-		userMessages,
-		setUserMessages,
-	] = useState([])
+  const [
+    username,
+    setUsername
+  ] = useState(null)
 
-	const [
-		destUserData,
-		setDestUserData
-	] = useState({
-		userId: null,
-		connected: false,
-	})
+  const [
+    destUsername,
+    setDestUsername
+  ] = useState(null)
 
-	useEffect(() => {
-		socket.on("private message", ({ content, from, to }) => {
-			onReceiveMessage(content, from)
-    })
-	}, [userMessages])
+  useEffect(() => {
+    setUsername(getUsername())
+    setDestUsername(getDestUsername())
 
-	useEffect(() => {
-		socket.on("connect", () => {
-			console.log(props.username)
-			socket.emit('user is online', props.destUsername)
-    })
+    console.log(username, destUsername)
+  }, [username, destUsername])
 
-		socket.on("user online", (userData) => {
-			if(userData) {
-				if(userData.connected) {
-					setDestUserData(userData)
-				}
-			}
-		})
+  useEffect(() => {
+    const sessionID = localStorage.getItem("sessionID");
+    const username = getUsername()
 
-   const [destUserData, setDestUserData] = useState({});
+    if (sessionID) {
+      socket.auth = { sessionID };
+      socket.connect();
+    } else if (username) {
+      socket.auth = { username }
+      socket.connect()
+    }
 
-   const [onReceived, setOnReceived] = useState(true);
+    socket.on("session", ({ sessionID, userID }) => {
+      // attach the session ID to the next reconnection attempts
+      socket.auth = { sessionID };
+      // store it in the localStorage
+      localStorage.setItem("sessionID", sessionID);
+      // save the ID of the user
+      socket.userID = userID;
+    });
 
-   // useEffect(() => {
-   //    socket.on('private message', ({ content, from, to }) => {
-   //       if (onReceived) {
-   //          setOnReceived(false);
-   //          onReceiveMessage(content, from);
-   //       }
-   //    });
-
-   //    // console.log(userMessages)
-
-   //    return () => {
-   //       setOnReceived(true);
-   //    };
-   // }, [userMessages]);
-
-   useEffect(() => {
-      socket.on('private message', ({ content, from, to }) => {
-         console.log(userMessages)
-         if (from != socket.userID) {
-            setUserMessages(userMessages => [
-               ...userMessages,
-               {
-                  content,
-                  fromSelf: false,
-               },
-            ]);
-            // console.log('PASSOU AQUI')
-            // onReceiveMessage(content, from);
-         };
-      });
-   }, []);
-
-   useEffect(() => {
-      socket.on('connect', () => {
-         console.log(props.username);
-         socket.emit('user is online', props.destUsername);
-      });
-
-      socket.on("user online", (userData) => {
-			if(userData) {
-				setDestUserData(userData)
-			}
-		})
-
-      return function cleanup() {
-         socket.off('connect');
-         socket.off('user online');
-         socket.off('private message');
+    socket.on("connect_error", (err) => {
+      if (err.message === "invalid username") {
+        setUsername(null)
+        setDestUsername(null)
       }
-   }, [props.destUsername]);
+    })
 
-   useEffect(() => {
-      const timer = setInterval(() => {
-         socket.emit('user is online', props.destUsername);
-      }, 5000);
+    return function cleanup() {
+      socket.off("session")
+      socket.off("connect_error")
+    }
+  }, [])
 
-      return function cleanup() {
-         clearInterval(timer);
-      };
-   }, [props.destUsername]);
-
-   function onMessage(content, to) {
-      console.log(`Mensagem ${content} enviada para ${to}`);
-      socket.emit('private message', {
-         content,
-         to,
-      });
-      setUserMessages([
-         ...userMessages,
-         {
-            content,
-            fromSelf: true,
-         },
-      ]);
-   }
-
-   function onReceiveMessage(content, from) {
-      console.log(`Mensagem ${content} recebida de ${from}`);
-      console.log('Mensagens antes: ', userMessages)
-      setUserMessages([
-         ...userMessages,
-         {
-            content,
-            fromSelf: false,
-         },
-      ]);
-      console.log('Mensagens depois: ', userMessages)
-   }
-
-   return (
-      <div>
-         <p>
-            UserId: {destUserData.userID}     Username: {props.destUsername}{' '}
-            {destUserData.connected ? '(ONLINE)' : '(OFFLINE)'}
-         </p>
-         <MessagePanel
-            username={props.username}
-            destUsername={props.destUsername}
-            destUserData={destUserData}
-            userMessages={userMessages}
-            onMessage={onMessage}
-         ></MessagePanel>
-      </div>
-   );
+  return (
+    <div className="App">
+      {
+        (!username && !destUsername) ?
+          <p>Loading...</p> :
+          <ChatBox
+            username={username}
+            destUsername={destUsername}
+          ></ChatBox>
+      }
+    </div>
+  )
 }
 
 export default Chat;
