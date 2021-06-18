@@ -14,6 +14,13 @@ const sessionStore = new InMemorySessionStore();
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
 
+  /**
+   * Verificar se USERNAME já está na base, se não tiver cria um novo
+   * com USERNAME, TOKEN, *LOGGED*, EXPIRE, caso tenha, verifica o
+   * EXPIRE e caso esteja expirado retorna erro. Caso contrário
+   * mantem a sessão ativa e renova o EXPIRE.
+   */
+
   if (sessionID) {
     // find existing session
     const session = sessionStore.findSession(sessionID);
