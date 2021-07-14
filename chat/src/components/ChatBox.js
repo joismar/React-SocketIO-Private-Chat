@@ -8,11 +8,11 @@ function ChatBox(props) {
 
    const [destUserData, setDestUserData] = useState({});
 
-   useEffect(() => {
-      socket.on('private message', ({ content, from, to }) => {
-         onReceiveMessage(content, from)
-      });
-   }, []);
+   // useEffect(() => {
+   //    socket.on('private message', ({ content, from, to }) => {
+   //       onReceiveMessage(content, from, destUserData.userID)
+   //    });
+   // }, []);
 
    useEffect(() => {
       socket.on('connect', () => {
@@ -20,18 +20,25 @@ function ChatBox(props) {
          socket.emit('user is online', props.destUsername);
       });
 
-      socket.on("user online", (userData) => {
-			if(userData) {
-				setDestUserData(userData)
-			}
-		})
-
       return function cleanup() {
          socket.off('connect');
          socket.off('user online');
          socket.off('private message');
       }
-   }, [props.destUsername]);
+   }, []);
+
+   useEffect(() => {
+      socket.on('private message', ({ content, from, to }) => {
+         onReceiveMessage(content, from, destUserData.userID)
+      });
+
+      socket.on("user online", (userData) => {
+			if(userData) {
+				setDestUserData(userData)
+			}
+		});
+
+   }, [destUserData.userID])
 
    useEffect(() => {
       const timer = setInterval(() => {
@@ -49,7 +56,7 @@ function ChatBox(props) {
          content,
          to,
       });
-      setUserMessages([
+      setUserMessages(userMessages => [
          ...userMessages,
          {
             content,
@@ -58,8 +65,9 @@ function ChatBox(props) {
       ]);
    }
 
-   function onReceiveMessage(content, from) {
-      if (from != socket.userID) {
+   function onReceiveMessage(content, from, destUserId) {
+      console.log(from, destUserId)
+      if (from == destUserData.userID) {
          setUserMessages(userMessages => [
             ...userMessages,
             {

@@ -6,15 +6,3 @@ body {
    font-family: Arial, sans-serif;
    font-size: 14px;
 }
-
-.message-panel {
-   border: 1px black solid;
-   height: 300px;
-   width: 400px;
-   position: absolute;
-}
-
-.messages {
-   overflow-y: scroll;
-   max-height: fit-content;
-}

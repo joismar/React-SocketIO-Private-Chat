@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../socket';
 import ChatBox from './ChatBox';
-import { getUsername, getDestUsername } from '.././helpers'
+import UserList from './UserList';
+import { getUsername, getDestUsername, getUserList } from '.././helpers'
 import MessagePanel from './MessagePanel';
 // import User from "./User"
 
 function Chat(props) {
-  const [
-    username,
-    setUsername
-  ] = useState(null)
+  const [username, setUsername] = useState(null)
 
-  const [
-    destUsername,
-    setDestUsername
-  ] = useState(null)
+  const [destUsername, setDestUsername] = useState(null)
+
+  const [userList, setUserList] = useState([])
 
   useEffect(() => {
     setUsername(props.username)
     setDestUsername(getDestUsername())
 
     console.log(username, destUsername)
-  }, [username, destUsername])
+  }, [username])
 
   useEffect(() => {
-    const sessionID = sessionStorage.getItem("sessionID");
+    setUserList(getUserList())
+  }, userList)
+
+  useEffect(() => {
+    const sessionID = localStorage.getItem("sessionID");
     const username = getUsername()
 
     if (sessionID) {
@@ -39,7 +40,7 @@ function Chat(props) {
       // attach the session ID to the next reconnection attempts
       socket.auth = { sessionID };
       // store it in the localStorage
-      sessionStorage.setItem("sessionID", sessionID);
+      localStorage.setItem("sessionID", sessionID);
       // save the ID of the user
       socket.userID = userID;
     });
@@ -65,11 +66,17 @@ function Chat(props) {
     <div className="App">
       {
         (!username && !destUsername) ?
-          <p>Loading...</p> :
+        <p>Loading...</p> :
+        <>
+          <UserList
+            setDestUsername={setDestUsername}
+            userList={userList || []}
+          ></UserList>
           <ChatBox
             username={username}
             destUsername={destUsername}
           ></ChatBox>
+        </>
       }
     </div>
   )

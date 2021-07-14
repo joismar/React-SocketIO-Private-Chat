@@ -1,5 +1,9 @@
 function getUsername() {
-	return sessionStorage.getItem("username")
+	return localStorage.getItem("username")
+}
+
+function getUserList() {
+	return JSON.parse(localStorage.getItem("userList") || "[]")
 }
 
 function getDestUsername() {
@@ -8,5 +12,6 @@ function getDestUsername() {
 
 module.exports = {
 	getUsername,
-	getDestUsername
+	getDestUsername,
+	getUserList,
 }

@@ -14,9 +14,9 @@ function App() {
   const [username, setUsername] = useState(null)
 
   useEffect(() => {
-    if (sessionStorage.getItem('auth-token')) {
-      setToken(sessionStorage.getItem('auth-token'))
-      setUsername(sessionStorage.getItem('username'))
+    if (localStorage.getItem('auth-token')) {
+      setToken(localStorage.getItem('auth-token'))
+      setUsername(localStorage.getItem('username'))
       setAuthenticated(true)
     }
   }, [])
@@ -45,8 +45,8 @@ function App() {
         setUsername(response.data.usuario)
         setAuthenticated(true)
 
-        sessionStorage.setItem('username', response.data.usuario)
-        sessionStorage.setItem('auth-token', response.headers['auth-token'])
+        localStorage.setItem('username', response.data.usuario)
+        localStorage.setItem('auth-token', response.headers['auth-token'])
       } else {
         console.log('Usuario/senha inválidos!')
       }
@@ -57,9 +57,9 @@ function App() {
   }
 
   function logout() {
-    sessionStorage.removeItem('username')
-    sessionStorage.removeItem('auth-token')
-    sessionStorage.removeItem('sessionID')
+    localStorage.removeItem('username')
+    localStorage.removeItem('auth-token')
+    localStorage.removeItem('sessionID')
 
     document.location.reload()
   }
@@ -76,11 +76,11 @@ function App() {
 
   return (
     <div className="App">
-      
       {
         authenticated ?
         <>
           <button onClick={logout}>SAI MIZERA</button>
+          
           <Chat
             username={username}
             token={token}
