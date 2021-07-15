@@ -9,7 +9,12 @@ const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
 
 const { InMemorySessionStore } = require("./sessionStore");
+const { InMemoryUserStore } = require("./userStore");
+const { InMemoryUserChatsStore } = require("./userChatsStore");
+
 const sessionStore = new InMemorySessionStore();
+const userStore = new InMemoryUserStore();
+const userChatsStore = new InMemoryUserChatsStore();
 
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
@@ -33,6 +38,7 @@ io.use((socket, next) => {
   }
 
   const username = socket.handshake.auth.username;
+
   if (!username) {
     return next(new Error("invalid username"));
   }
@@ -84,6 +90,12 @@ io.on("connection", (socket) => {
     })
 
     socket.emit("user online", users[username] || null)
+  })
+
+  // retrieve user messages
+  socket.on('user messages', (username) => {
+    messages = userChatsStore.findMessagesByUser(username)
+    socket.emit("user messages", messages)
   })
              
   // forward the private message to the right recipient

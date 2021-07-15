@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react'
 
 function UserList(props) {
 
+	function setUser(user) {
+		props.setDestUsername(user);
+	}
+
 	return (
 		<div className='userlist'>
 			<ul>
 				{
 					props.userList.map((user) => {
 						return (
-							<li onClick={props.setDestUsername(user)}>{user}</li>
+							<button onClick={setUser(user)}>{user}</button>
 						)
 					})
 				}
